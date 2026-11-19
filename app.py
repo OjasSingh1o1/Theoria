@@ -166,6 +166,12 @@ with tab3:
     st.subheader("Which Features Actually Carry the Signal?")
     st.write("Proving which physical properties carry the information that allows the classifier to identify the traffic.")
 
+    if os.path.exists("results/theoria_nodal_relationship_graph.png"):
+        st.image("results/theoria_nodal_relationship_graph.png",
+                 caption="Theoria Nodal Signal-to-Application Relationship Map",
+                 use_container_width=True)
+        st.divider()
+
     col_exp1, col_exp2 = st.columns(2)
     with col_exp1:
         st.markdown("#### 1. Gini Feature Importance Ranking")

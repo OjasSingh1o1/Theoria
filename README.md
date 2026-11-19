@@ -209,6 +209,70 @@ flowchart LR
 
 ---
 
+## Nodal Signal-to-Application Routing Map
+
+The 23 numerical features do not act in isolation. Rather, they group into **4 Functional Feature Dimensions** that converge into the Theoria Ensemble Hub, where non-linear decision thresholds route distinct physical signatures directly into target application classifications:
+
+<p align="center">
+  <img src="results/theoria_nodal_relationship_graph.png" alt="Theoria Nodal Signal-to-Application Relationship Map" width="100%" />
+</p>
+
+```mermaid
+flowchart LR
+    subgraph D1["Dimension 1: Volume & Throughput"]
+        D1_F["flowBytesPerSecond (9.48%)\nflowPktsPerSecond\nflow duration"]
+    end
+
+    subgraph D2["Dimension 2: Client Cadence (FIAT)"]
+        D2_F["min_fiat (6.03%)\nmax_fiat\nmean_fiat\ntotal_fiat"]
+    end
+
+    subgraph D3["Dimension 3: Server Response (BIAT)"]
+        D3_F["total_biat (6.41%)\nmin_biat\nmax_biat\nmean_biat"]
+    end
+
+    subgraph D4["Dimension 4: Dynamics & Jitter"]
+        D4_F["min_flowiat (6.31%)\nmax_flowiat (6.19%)\nstd_flowiat\nactive/idle intervals"]
+    end
+
+    subgraph HUB["Theoria Ensemble Hub"]
+        RF_Trees["Random Forest (100 Trees)\nStandardScaler Normalized\nMulticlass Routing"]
+    end
+
+    subgraph LEAVES["Application Target Signatures"]
+        direction TB
+        L_VOIP["VOIP\n97% Recall\nSignature: Continuous, symmetric ~20ms IAT, zero idle"]
+        L_STREAM["STREAMING\n84% Recall\nSignature: Massive asymmetric BIAT throughput, cyclic buffer refills"]
+        L_FT["FILE TRANSFER\n94% Recall\nSignature: Max-segment packet flooding, sustained bandwidth"]
+        L_BROWSE["BROWSING\n93% Recall\nSignature: Bursty active downloads + prolonged human idle pauses"]
+        L_P2P["P2P\n94% Recall\nSignature: Multi-endpoint connections, periodic peer heartbeats"]
+        L_CHAT["CHAT\n88% Recall\nSignature: Minimal byte count, sporadic typing pauses"]
+        L_MAIL["MAIL\n89% Recall\nSignature: Periodic TLS handshakes, brief upload/download bursts"]
+    end
+
+    D1_F --> HUB
+    D2_F --> HUB
+    D3_F --> HUB
+    D4_F --> HUB
+
+    HUB -->|Minimal IAT + Low Jitter| L_VOIP
+    HUB -->|High BIAT Rate + Cyclic Bursts| L_STREAM
+    HUB -->|High Byte/s + Unidirectional| L_FT
+    HUB -->|High Idle Duration + Bursty Downloads| L_BROWSE
+    HUB -->|Multi-endpoint + Steady Cadence| L_P2P
+    HUB -->|Low Byte/s + Sporadic FIAT| L_CHAT
+    HUB -->|Periodic Sync + Brief Handshake| L_MAIL
+```
+
+### Logical Explanation of Nodal Routing:
+1. **VoIP Routing:** Governed by **Dimension 4 (Dynamics & Jitter)** and **Dimension 2/3 (FIAT/BIAT)**. Audio codecs emit frames at fixed 20ms intervals. Regardless of VPN tunneling or TLS wrapping, packets must depart continuously without buffering delay. The classifier recognizes VoIP by near-zero variance in `min_flowiat` and low `flowBytesPerSecond`.
+2. **Streaming Routing:** Governed by **Dimension 1 (Volume & Throughput)** and **Dimension 3 (Server BIAT)**. Video players rapidly pull chunks of content to refill the client buffer, creating massive asymmetric bursts from server to client (`mean_biat`), followed by predictable silent pauses while the user watches buffered video.
+3. **File Transfer Routing:** Governed by **Dimension 1 (Volume & Throughput)**. Characterized by maximum transmission unit (MTU) packet flooding in one direction with sustained saturation of `flowBytesPerSecond`.
+4. **Browsing Routing:** Governed by **Dimension 4 (Idle Intervals)**. Human web interactions are inherently bursty: requesting a web page triggers a flurry of TCP/TLS handshakes and asset downloads (active period), followed by hundreds of seconds of silence while the human reads the page (`max_idle` and `max_flowiat`).
+5. **P2P & Background Sync (Chat/Mail):** Characterized by periodic keep-alive probes and intermittent, lightweight payloads.
+
+---
+
 ## Runtime Inference Execution Workflow
 
 When an unknown network conversation is analyzed at runtime, `theoria.py` executes the following deterministic workflow:
