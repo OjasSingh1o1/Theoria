@@ -128,6 +128,37 @@ def draw_table(headers, rows, col_widths=None, highlight_best=None):
     print(hline(BL, BT, BR))
 
 
+def render_theoria_cursive_banner():
+    """Renders 'Theoria' in cursive handwriting with a whitish-cyan gradient."""
+    lines = [
+        r"    ______  __                            _        ",
+        r"   /_  __/ / /_   ___   ____   _____ (_) ____ _    ",
+        r"    / /   / __ \ / _ \ / __ \ / ___// / / __ `/    ",
+        r"   / /   / / / //  __// /_/ // /   / / / /_/ /     ",
+        r"  /_/   /_/ /_/ \___/ \____//_/   /_/  \__,_/      "
+    ]
+    max_len = max(len(l) for l in lines)
+    num_rows = len(lines)
+    rendered = []
+    for row_idx, line in enumerate(lines):
+        row = ""
+        for col_idx, char in enumerate(line):
+            if char == " ":
+                row += " "
+                continue
+            ratio_x = col_idx / max(1, max_len - 1)
+            ratio_y = row_idx / max(1, num_rows - 1)
+            ratio = 0.75 * ratio_x + 0.25 * ratio_y
+            
+            # Whitish-cyan gradient: from bright whitish cyan (242, 255, 255) to vibrant cyan (30, 215, 245)
+            r = int(242 + ratio * (30 - 242))
+            g = int(255 + ratio * (215 - 255))
+            b = int(255 + ratio * (245 - 255))
+            row += f"\033[38;2;{r};{g};{b}m\033[1m{char}\033[0m"
+        rendered.append(row)
+    return "\n".join(rendered)
+
+
 def section_header(number, title, subtitle=""):
     """Print a styled section header."""
     print()
@@ -147,15 +178,10 @@ def main():
     start_time = time.time()
 
     # ───── Banner ─────
+    cursive_art = render_theoria_cursive_banner()
     banner = f"""
-{CYAN}{BOLD}
-  ████████╗██╗  ██╗███████╗ ██████╗ ██████╗ ██╗ █████╗
-  ╚══██╔══╝██║  ██║██╔════╝██╔═══██╗██╔══██╗██║██╔══██╗
-     ██║   ███████║█████╗  ██║   ██║██████╔╝██║███████║
-     ██║   ██╔══██║██╔══╝  ██║   ██║██╔══██╗██║██╔══██║
-     ██║   ██║  ██║███████╗╚██████╔╝██║  ██║██║██║  ██║
-     ╚═╝   ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝
-{RESET}
+{cursive_art}
+
   {GRAY}Encrypted Network Traffic Analysis & Classification Engine{RESET}
   {DIM}Guessing what is inside a sealed parcel — without opening it.{RESET}
 """
