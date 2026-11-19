@@ -156,23 +156,17 @@ Evaluated on **11,942 unseen test flows** using both Accuracy and Macro F1:
 | **Multi-Layer Perceptron (MLP)** | **71.40%** | **0.6460** | **0.7027** | Neural network baseline (struggles on tabular statistics) |
 | **Dummy Classifier** | **33.50%** | **0.0717** | **0.1681** | Sanity floor (Predicts majority class: Browsing) |
 
+<p align="center">
+  <img src="results/model_benchmark_comparison.png" alt="Theoria Multi-Model Benchmark Comparison" width="90%" />
+</p>
+
 ### Confusion Matrix (Random Forest Champion)
 
 The normalized confusion matrix demonstrates clean diagonal separation across all application types, confirming that minority classes like Streaming and Chat are identified with high precision:
 
-```
-                  Predicted Class
-             BR    CH    FT    MA    P2    ST    VO
-        BR [0.93  0.01  0.02  0.01  0.02  0.00  0.01]
-        CH [0.03  0.88  0.02  0.03  0.02  0.00  0.02]
-True    FT [0.02  0.01  0.94  0.01  0.02  0.00  0.00]
-Class   MA [0.04  0.03  0.01  0.89  0.02  0.00  0.01]
-        P2 [0.02  0.01  0.02  0.01  0.94  0.00  0.00]
-        ST [0.08  0.01  0.03  0.01  0.02  0.84  0.01]
-        VO [0.01  0.01  0.00  0.00  0.00  0.00  0.97]
-```
-
-Full resolution visual confusion matrices are stored in `results/`.
+<p align="center">
+  <img src="results/random_forest_confusion_matrix.png" alt="Random Forest Normalized Confusion Matrix" width="70%" />
+</p>
 
 ---
 
@@ -208,6 +202,10 @@ flowchart LR
 | **#3** | `min_flowiat` | **6.31%** | Shortest pause between any two packets: application heartbeat regularity |
 | **#4** | `max_flowiat` | **6.19%** | Longest silence period: user think time and idle intervals |
 | **#5** | `min_fiat` | **6.03%** | Shortest pause between outgoing packets: client upload frequency |
+
+<p align="center">
+  <img src="results/feature_importance_ranking.png" alt="Theoria Feature Importance Ranking" width="90%" />
+</p>
 
 ---
 

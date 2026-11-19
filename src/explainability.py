@@ -46,19 +46,54 @@ def stratified_subsample(X, y, n=2000, random_state=42):
     return X[sampled_idx], y[sampled_idx]
 
 def plot_feature_importance(importances, feature_names, output_dir="results"):
-    """Bar chart of Gini feature importances from Random Forest."""
+    """Publication-grade bar chart of Gini feature importances."""
     os.makedirs(output_dir, exist_ok=True)
 
-    sorted_idx = np.argsort(importances)[::-1]
-    sorted_names = feature_names[sorted_idx]
-    sorted_vals = importances[sorted_idx]
+    sorted_idx = np.argsort(importances)[::-1][:15]
+    top_names = feature_names[sorted_idx]
+    top_vals = importances[sorted_idx] * 100
 
-    plt.figure(figsize=(10, 7))
-    colors = sns.color_palette("viridis", len(sorted_names))
-    plt.barh(range(len(sorted_names)), sorted_vals[::-1], color=colors)
-    plt.yticks(range(len(sorted_names)), sorted_names[::-1])
-    plt.xlabel("Gini Importance")
-    plt.title("Random Forest Feature Importance\n(Which clues carry the most signal?)")
+    meanings = {
+        'flowBytesPerSecond': 'Throughput Speed',
+        'total_biat': 'Incoming Response Pause',
+        'min_flowiat': 'Fastest Packet Heartbeat',
+        'max_flowiat': 'Longest Idle Interval',
+        'min_fiat': 'Fastest Client Outgoing Gap',
+        'min_biat': 'Fastest Server Incoming Gap',
+        'total_fiat': 'Total Client Upload Silence',
+        'duration': 'Conversation Length',
+        'flowPktsPerSecond': 'Packet Frequency Rate',
+        'std_flowiat': 'Timing Jitter / Irregularity',
+        'mean_flowiat': 'Average Inter-Arrival Delay',
+        'mean_biat': 'Average Server Response Delay',
+        'max_biat': 'Longest Server Response Silence',
+        'max_fiat': 'Longest Client Upload Silence',
+        'mean_fiat': 'Average Client Outgoing Delay'
+    }
+
+    display_labels = [f"{name} ({meanings.get(name, 'Flow Dynamic')})" for name in top_names]
+
+    fig, ax = plt.subplots(figsize=(11, 7.5), dpi=300)
+    fig.patch.set_facecolor('#FFFFFF')
+    ax.set_facecolor('#FAFAFA')
+
+    colors = plt.cm.GnBu_r(np.linspace(0.15, 0.75, len(top_vals)))
+    y_pos = np.arange(len(top_vals))
+    ax.barh(y_pos, top_vals[::-1], color=colors[::-1], height=0.68, edgecolor='none', zorder=3)
+
+    for i, v in enumerate(top_vals[::-1]):
+        ax.text(v + 0.15, i, f"{v:.2f}%", va='center', ha='left', fontsize=9, fontweight='bold', color='#1E293B')
+
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(display_labels[::-1], fontsize=9.5, color='#0F172A')
+    ax.set_xlabel('Gini Feature Importance (%)', fontsize=11, fontweight='bold', color='#334155', labelpad=10)
+    ax.set_title('Theoria: Top 15 Most Discriminative Side-Channel Features\nRandom Forest Importance (What Makes the Box Rattle?)',
+                 fontsize=13, fontweight='bold', pad=15, color='#0F172A')
+    ax.set_xlim(0, max(top_vals) * 1.15)
+    ax.grid(axis='x', linestyle=':', alpha=0.6, zorder=0)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, "feature_importance_ranking.png"), dpi=300)
     plt.close()

@@ -145,6 +145,9 @@ with tab2:
 
     st.dataframe(disp_df, use_container_width=True, hide_index=True)
 
+    if os.path.exists("results/model_benchmark_comparison.png"):
+        st.image("results/model_benchmark_comparison.png", caption="Multi-Model Benchmark & 80% Gate-Check Verification", use_container_width=True)
+
     st.info("💡 **The Gate Check:** Decision Tree (90.7%) and k-NN (82.4%) were the paper's original models. Replicating >80% proved our data hygiene was correct before training the winning Random Forest (92.6%).")
 
     st.subheader("Normalized Confusion Matrix")

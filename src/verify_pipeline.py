@@ -47,7 +47,8 @@ def run_health_check():
 
     # 4. Results checks
     plots_to_check = [
-        "model_comparison.json", "random_forest_confusion_matrix.png",
+        "model_comparison.json", "model_benchmark_comparison.png",
+        "random_forest_confusion_matrix.png",
         "feature_importance_ranking.png", "shap_global_bar.png",
         "shap_voip_dot.png", "shap_values.npz"
     ]

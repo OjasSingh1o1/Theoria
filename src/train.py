@@ -42,19 +42,30 @@ def load_data(npz_path="data/prepared_data.npz"):
         data['classes'], data['feature_names']
     )
 
-def plot_confusion_matrix(y_true, y_pred, classes, model_name, output_dir="results"):
+def plot_confusion_matrix(y_true, y_pred, classes, model_name, acc=None, macro_f1=None, output_dir="results"):
     os.makedirs(output_dir, exist_ok=True)
     cm = confusion_matrix(y_true, y_pred, normalize='true')
     
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='.2f', cmap='Blues',
-                xticklabels=classes, yticklabels=classes)
-    plt.title(f"Normalized Confusion Matrix - {model_name}")
-    plt.ylabel('True Class')
-    plt.xlabel('Predicted Class')
-    plt.xticks(rotation=45, ha='right')
-    plt.tight_layout()
+    fig, ax = plt.subplots(figsize=(8.5, 7), dpi=300)
+    fig.patch.set_facecolor('#FFFFFF')
+    ax.set_facecolor('#FFFFFF')
     
+    sns.heatmap(cm, annot=True, fmt='.2f', cmap='Blues', cbar=True,
+                xticklabels=classes, yticklabels=classes,
+                annot_kws={"size": 10, "weight": "bold"}, ax=ax,
+                linewidths=0.5, linecolor='#F1F5F9')
+    
+    subtitle = ""
+    if acc is not None and macro_f1 is not None:
+        subtitle = f"\nAccuracy: {acc*100:.2f}% | Macro F1: {macro_f1:.4f} (N = {len(y_true):,} Flows)"
+    ax.set_title(f"Theoria: {model_name} — Confusion Matrix{subtitle}",
+                 fontsize=12, fontweight='bold', pad=15, color='#0F172A')
+    ax.set_ylabel('True Application Class', fontsize=10.5, fontweight='bold', color='#334155')
+    ax.set_xlabel('Predicted Application Class', fontsize=10.5, fontweight='bold', color='#334155')
+    ax.set_xticklabels(classes, rotation=35, ha='right', fontsize=9.5, color='#1E293B')
+    ax.set_yticklabels(classes, rotation=0, fontsize=9.5, color='#1E293B')
+    
+    plt.tight_layout()
     filename = f"{model_name.lower().replace(' ', '_').replace('/', '_')}_confusion_matrix.png"
     plt.savefig(os.path.join(output_dir, filename), dpi=300)
     plt.close()
@@ -78,7 +89,7 @@ def evaluate_model(model, X_train, y_train, X_test, y_test, classes, model_name)
     print(classification_report(y_test, y_pred, target_names=classes, digits=4))
     
     # Save confusion matrix plot
-    plot_confusion_matrix(y_test, y_pred, classes, model_name)
+    plot_confusion_matrix(y_test, y_pred, classes, model_name, acc=acc, macro_f1=macro_f1)
     
     # Save model artifact
     clean_name = model_name.lower().replace(' ', '_').replace('/', '_')
