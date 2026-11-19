@@ -1,0 +1,38 @@
+[
+    {
+        "model": "Dummy Classifier",
+        "accuracy": 0.33495226930162453,
+        "macro_f1": 0.07168844203093357,
+        "weighted_f1": 0.1680854443867141
+    },
+    {
+        "model": "Decision Tree",
+        "accuracy": 0.9073019594707754,
+        "macro_f1": 0.8892658802453253,
+        "weighted_f1": 0.906729174736428
+    },
+    {
+        "model": "k-Nearest Neighbors",
+        "accuracy": 0.8235638921453693,
+        "macro_f1": 0.7898057525057555,
+        "weighted_f1": 0.8215942878809647
+    },
+    {
+        "model": "Random Forest",
+        "accuracy": 0.9260592865516664,
+        "macro_f1": 0.9123427956255653,
+        "weighted_f1": 0.9254409130574552
+    },
+    {
+        "model": "Gradient Boosting (HistGB)",
+        "accuracy": 0.9070507452687991,
+        "macro_f1": 0.8849189457544988,
+        "weighted_f1": 0.9058698863644824
+    },
+    {
+        "model": "Multi-Layer Perceptron",
+        "accuracy": 0.7139507620164126,
+        "macro_f1": 0.6459726404237378,
+        "weighted_f1": 0.7027166647466307
+    }
+]
