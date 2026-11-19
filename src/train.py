@@ -1,6 +1,8 @@
 """
-train.py: Multi-model training and benchmarking for Encrypted Network Traffic Analysis.
+Theoria — train.py
+Encrypted Network Traffic Analysis & Classification Engine.
 
+Multi-model training and benchmarking pipeline.
 Model Evaluation Order:
   1. Dummy Classifier (sanity floor ~ 33%)
   2. Decision Tree (paper baseline - gate check: expected ~80-90%)

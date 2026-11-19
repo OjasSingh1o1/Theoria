@@ -1,6 +1,8 @@
 """
-app.py: The Sealed Parcel Live Demonstration Dashboard.
-An interactive demonstration app for Encrypted Network Traffic Analysis.
+Theoria — app.py
+Encrypted Network Traffic Analysis & Classification Engine.
+
+Interactive Streamlit dashboard for the Sealed Parcel demonstration.
 """
 
 import streamlit as st
@@ -13,7 +15,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 st.set_page_config(
-    page_title="The Sealed Parcel | Encrypted Traffic Classifier",
+    page_title="Theoria | Encrypted Traffic Classifier",
     page_icon="📦",
     layout="wide"
 )
@@ -41,7 +43,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">📦 Guessing What is Inside a Sealed Parcel</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">📦 Theoria — The Sealed Parcel</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title"><b>Encrypted Network Traffic Classification</b> via Side-Channel Metadata (Packet Timing, Sizes & Rates)</div>', unsafe_allow_html=True)
 
 @st.cache_resource

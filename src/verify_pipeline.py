@@ -1,5 +1,8 @@
 """
-verify_pipeline.py: End-to-end system health and verification script.
+Theoria — verify_pipeline.py
+Encrypted Network Traffic Analysis & Classification Engine.
+
+End-to-end system health and verification script.
 Tests:
   1. File existence (raw data, prepared partitions, model weights, evaluation plots).
   2. Model deserialization and integrity.
@@ -12,7 +15,7 @@ import joblib
 
 def run_health_check():
     print("=" * 60)
-    print("SYSTEM HEALTH & ARTIFACT VERIFICATION CHECK")
+    print("THEORIA — SYSTEM HEALTH & ARTIFACT VERIFICATION")
     print("=" * 60)
 
     # 1. Dataset checks
@@ -72,7 +75,7 @@ def run_health_check():
     print("    [✓] Live inference verified successfully!")
 
     print("=" * 60)
-    print("ALL CHECKS PASSED: Project is 100% operational!")
+    print("ALL CHECKS PASSED: Theoria is 100% operational!")
     print("=" * 60)
 
 if __name__ == "__main__":

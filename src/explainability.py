@@ -1,6 +1,8 @@
 """
-explainability.py: Feature Importance & SHAP Explainability Analysis.
+Theoria — explainability.py
+Encrypted Network Traffic Analysis & Classification Engine.
 
+Feature Importance & SHAP Explainability Analysis.
 Answers the core question: "Which features actually carry the signal?"
 - Gini Feature Importance from Random Forest (full test set).
 - SHAP values on a stratified 2,000-sample subset of the test set.

@@ -1,6 +1,8 @@
 """
-preprocessing.py: Clean, transform, and prepare encrypted network traffic data.
+Theoria — preprocessing.py
+Encrypted Network Traffic Analysis & Classification Engine.
 
+Clean, transform, and prepare encrypted network traffic data.
 Creates:
   1. app_label: 7 broad application categories (BROWSING, VOIP, FILE_TRANSFER, P2P, CHAT, MAIL, STREAMING)
   2. is_vpn: Binary flag (1 if encapsulated in VPN tunnel, 0 otherwise)
