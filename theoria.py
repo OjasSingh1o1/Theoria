@@ -29,6 +29,8 @@ RED       = "\033[38;5;203m"
 YELLOW    = "\033[38;5;222m"
 CYAN      = "\033[38;5;117m"
 MAGENTA   = "\033[38;5;183m"
+PURPLE    = "\033[38;5;177m"
+AMBER     = "\033[38;5;214m"
 WHITE     = "\033[38;5;255m"
 GRAY      = "\033[38;5;245m"
 BG_HEADER = "\033[48;5;236m"
@@ -128,6 +130,89 @@ def draw_table(headers, rows, col_widths=None, highlight_best=None):
     print(hline(BL, BT, BR))
 
 
+def format_node_label(name, is_target, conf):
+    clean = name.replace("_", " ").capitalize()
+    if is_target:
+        return f"{CYAN}{BOLD}[*] {clean} ({conf:.1f}%){RESET}"
+    return f"{GRAY}( ) {clean} ({conf:.1f}%){RESET}"
+
+
+def render_obsidian_nodal_graph(pred_app, conf_app, true_app, pred_vpn_flag, conf_vpn, true_vpn_flag, all_classes, probs=None, vpn_probs=None):
+    """Renders a dynamic Obsidian-style constellation topology map in the terminal (no emojis, title case only)."""
+    def fmt_title(s):
+        return s.replace("_", " ").capitalize()
+
+    # Dynamic ranking of application classes by probability distribution
+    if probs is not None:
+        ranked = sorted(zip(all_classes, probs), key=lambda x: x[1], reverse=True)
+    else:
+        ranked = [(c, conf_app / 100.0 if c == pred_app else 0.0) for c in all_classes]
+        ranked.sort(key=lambda x: x[1], reverse=True)
+
+    winner_name, winner_p = ranked[0]
+    runner_name, runner_p = ranked[1]
+    third_name, third_p   = ranked[2]
+    p3_name, p3_p         = ranked[3]
+    p4_name, p4_p         = ranked[4]
+    p5_name, p5_p         = ranked[5]
+    p6_name, p6_p         = ranked[6]
+
+    # Application constellation nodes
+    n_win    = f"{CYAN}{BOLD}[*] {fmt_title(winner_name)} ({winner_p * 100:.1f}%){RESET}"
+    n_runner = f"{WHITE}{BOLD}( ) {fmt_title(runner_name)} ({runner_p * 100:.1f}%){RESET}" if runner_p > 0.02 else f"{GRAY}( ) {fmt_title(runner_name)} ({runner_p * 100:.1f}%){RESET}"
+    n_third  = f"{GRAY}( ) {fmt_title(third_name)} ({third_p * 100:.1f}%){RESET}"
+    n_p3     = f"{GRAY}( ) {fmt_title(p3_name)} ({p3_p * 100:.1f}%){RESET}"
+    n_p4     = f"{GRAY}( ) {fmt_title(p4_name)} ({p4_p * 100:.1f}%){RESET}"
+    n_p5     = f"{GRAY}( ) {fmt_title(p5_name)} ({p5_p * 100:.1f}%){RESET}"
+    n_p6     = f"{GRAY}( ) {fmt_title(p6_name)} ({p6_p * 100:.1f}%){RESET}"
+
+    # Transport dual pivots with actual probabilities
+    p_vpn_prob = vpn_probs[1] * 100 if vpn_probs is not None else conf_vpn
+    p_dir_prob = vpn_probs[0] * 100 if vpn_probs is not None else 100.0 - conf_vpn
+
+    if pred_vpn_flag == 1:
+        hub_active = f"{PURPLE}{BOLD}[*] Vpn tunnel ({p_vpn_prob:.1f}%){RESET}"
+        hub_sub    = f"{DIM}{GRAY}( ) Direct internet ({p_dir_prob:.1f}%){RESET}"
+        carrier_color = PURPLE
+    else:
+        hub_active = f"{AMBER}{BOLD}[*] Direct internet ({p_dir_prob:.1f}%){RESET}"
+        hub_sub    = f"{DIM}{GRAY}( ) Vpn tunnel ({p_vpn_prob:.1f}%){RESET}"
+        carrier_color = AMBER
+
+    carrier_beam = f"{carrier_color}{BOLD}═══════════════════════●═══════════════════════{RESET}"
+
+    # Visual dynamic constellation frame
+    print(f"  {DIM}+--{RESET} {BOLD}Obsidian Dynamic Topology Constellation{RESET} {DIM}------------------------------------------------+{RESET}")
+    print(f"  {DIM}|{RESET}")
+    print(f"  {DIM}|{RESET}      {n_p5}                                   {n_third}")
+    print(f"  {DIM}|{RESET}            \\                                                 /")
+    print(f"  {DIM}|{RESET}             \\                                               /")
+    print(f"  {DIM}|{RESET}              \\                                             /")
+    print(f"  {DIM}|{RESET}     {hub_active}")
+    print(f"  {DIM}|{RESET}            ║")
+    print(f"  {DIM}|{RESET}            ╠{carrier_beam} {n_win}")
+    print(f"  {DIM}|{RESET}            ║                                                    │")
+    print(f"  {DIM}|{RESET}            ║  (Carrier Resonance Ray)                           : (Contender Filament)")
+    print(f"  {DIM}|{RESET}            ║                                                    │")
+    print(f"  {DIM}|{RESET}     {hub_sub}                                {n_runner}")
+    print(f"  {DIM}|{RESET}            │                                                    │")
+    print(f"  {DIM}|{RESET}            │                                                    /")
+    print(f"  {DIM}|{RESET}            └─── {n_p3} ──── {n_p4} ──── {n_p6} ───┘")
+    print(f"  {DIM}|{RESET}                      (Peripheral Constellation Mesh)")
+    print(f"  {DIM}|{RESET}")
+
+    app_match = (pred_app == true_app)
+    vpn_match = (pred_vpn_flag == true_vpn_flag)
+    app_t = fmt_title(true_app)
+    vpn_t = "Vpn tunnel" if true_vpn_flag == 1 else "Direct internet"
+
+    s_app = f"{GREEN}Match{RESET}" if app_match else f"{RED}Mismatch (True: {app_t}){RESET}"
+    s_vpn = f"{GREEN}Match{RESET}" if vpn_match else f"{RED}Mismatch (True: {vpn_t}){RESET}"
+
+    print(f"  {DIM}|{RESET}  {BOLD}Verification:{RESET} Application: {s_app}  {DIM}|{RESET}  Transport: {s_vpn}")
+    print(f"  {DIM}+---------------------------------------------------------------------------------------------+{RESET}")
+
+
 def section_header(number, title, subtitle=""):
     """Print a styled section header."""
     print()
@@ -173,7 +258,7 @@ def main():
     # ═════════════════════════════════════════════════════════
     # SECTION 1: Data Profile
     # ═════════════════════════════════════════════════════════
-    section_header("01", "DATA PROFILE", "Dataset composition and partition integrity")
+    section_header("01", "Data Profile", "Dataset composition and partition integrity")
 
     data_path = "data/prepared_data.npz"
     if not os.path.exists(data_path):
@@ -188,9 +273,10 @@ def main():
     n_test  = len(data['X_test'])
     n_total = n_train + n_val + n_test
 
+    classes_title = [c.replace('_', ' ').capitalize() for c in classes]
     print(f"  {CHECK} Total Flows           {WHITE}{BOLD}{n_total:,}{RESET}")
     print(f"  {CHECK} Feature Dimensions    {WHITE}{len(features)}{RESET} physical timing/rate metrics")
-    print(f"  {CHECK} Target Categories     {WHITE}{len(classes)}{RESET}: {GRAY}{', '.join(classes)}{RESET}")
+    print(f"  {CHECK} Target Categories     {WHITE}{len(classes)}{RESET}: {GRAY}{', '.join(classes_title)}{RESET}")
     print()
 
     draw_table(
@@ -208,13 +294,12 @@ def main():
     if vpn_test is not None:
         vpn_count = int(np.sum(vpn_test))
         total_vpn = vpn_count
-        # Approximate from full dataset
-        print(f"\n  {CHECK} VPN Encapsulation     {GRAY}~50.4% VPN / ~49.6% Direct (preserved in splits){RESET}")
+        print(f"\n  {CHECK} Vpn Encapsulation     {GRAY}~50.4% Vpn / ~49.6% Direct (preserved in splits){RESET}")
 
     # ═════════════════════════════════════════════════════════
     # SECTION 2: Benchmark Leaderboard
     # ═════════════════════════════════════════════════════════
-    section_header("02", "BENCHMARK LEADERBOARD", "6-model comparison on 11,942 unseen test flows")
+    section_header("02", "Benchmark Leaderboard", "6-model comparison on 11,942 unseen test flows")
 
     with open("results/model_comparison.json") as f:
         metrics = json.load(f)
@@ -260,7 +345,7 @@ def main():
     # ═════════════════════════════════════════════════════════
     # SECTION 3: Signal Discovery
     # ═════════════════════════════════════════════════════════
-    section_header("03", "SIGNAL DISCOVERY", "What makes the box rattle? — Top discriminative features")
+    section_header("03", "Signal Discovery", "Physical side-channel feature ranking")
 
     rf = joblib.load("models/random_forest.pkl")
     importances = rf.feature_importances_
@@ -299,60 +384,65 @@ def main():
     )
 
     # ═════════════════════════════════════════════════════════
-    # SECTION 4: Live Mystery Parcel Inspection
+    # SECTION 4: Live Mystery Parcel Inspection (Obsidian Nodal Topology)
     # ═════════════════════════════════════════════════════════
-    section_header("04", "LIVE MYSTERY PARCEL INSPECTION", "Real-time inference on 3 random unseen test flows")
+    section_header("04", "Live Mystery Parcel Inspection", "Real-time inference with Obsidian nodal topology routing")
 
     scaler = joblib.load("models/scaler.pkl")
     le = joblib.load("models/label_encoder.pkl")
+    rf_vpn = joblib.load("models/vpn_classifier.pkl")
 
     # Truly random selection — no fixed seed
     sample_indices = np.random.choice(len(data['X_test']), size=3, replace=False)
 
-    correct = 0
+    app_correct = 0
+    vpn_correct = 0
+    both_correct = 0
+
     for i, s_idx in enumerate(sample_indices, 1):
         x_raw_scaled = data['X_test'][s_idx:s_idx+1]
         x_unscaled = scaler.inverse_transform(x_raw_scaled)[0]
         true_label = le.inverse_transform([data['y_app_test'][s_idx]])[0]
+        true_vpn_flag = int(data['y_vpn_test'][s_idx])
 
+        # Head 1: Application Classifier
         probs = rf.predict_proba(x_raw_scaled)[0]
         pred_idx = np.argmax(probs)
         pred_label = le.inverse_transform([pred_idx])[0]
-        conf = probs[pred_idx] * 100
+        conf_app = probs[pred_idx] * 100
 
-        is_correct = pred_label == true_label
-        if is_correct:
-            correct += 1
+        # Head 2: Transport (VPN vs Direct)
+        vpn_probs = rf_vpn.predict_proba(x_raw_scaled)[0]
+        pred_vpn_flag = np.argmax(vpn_probs)
+        conf_vpn = vpn_probs[pred_vpn_flag] * 100
 
-        # Parcel box
-        status_icon = CHECK if is_correct else FAIL
-        status_text = f"{GREEN}CORRECT{RESET}" if is_correct else f"{RED}MISMATCH{RESET}"
+        if pred_label == true_label: app_correct += 1
+        if pred_vpn_flag == true_vpn_flag: vpn_correct += 1
+        if pred_label == true_label and pred_vpn_flag == true_vpn_flag: both_correct += 1
 
         speed_val = x_unscaled[features.index('flowBytesPerSecond')]
         min_iat   = x_unscaled[features.index('min_flowiat')]
         duration  = x_unscaled[features.index('duration')]
         avg_biat  = x_unscaled[features.index('mean_biat')]
 
-        print(f"  {MAGENTA}{BOLD}╔{'═' * 62}╗{RESET}")
-        print(f"  {MAGENTA}{BOLD}║{RESET}  {WHITE}{BOLD}Mystery Parcel #{i}{RESET}  {GRAY}(Test Sample #{s_idx}){RESET}{' ' * (62 - 35 - len(str(s_idx)))} {MAGENTA}{BOLD}║{RESET}")
-        print(f"  {MAGENTA}{BOLD}╠{'═' * 62}╣{RESET}")
-        print(f"  {MAGENTA}{BOLD}║{RESET}  {ARROW} Transfer Speed      {WHITE}{fmt_bytes(speed_val):<20}{RESET}             {MAGENTA}{BOLD}║{RESET}")
-        print(f"  {MAGENTA}{BOLD}║{RESET}  {ARROW} Min Packet Gap      {WHITE}{fmt_time(min_iat):<20}{RESET}             {MAGENTA}{BOLD}║{RESET}")
-        print(f"  {MAGENTA}{BOLD}║{RESET}  {ARROW} Flow Duration        {WHITE}{fmt_time(duration):<20}{RESET}             {MAGENTA}{BOLD}║{RESET}")
-        print(f"  {MAGENTA}{BOLD}║{RESET}  {ARROW} Avg Incoming Gap    {WHITE}{fmt_time(avg_biat):<20}{RESET}             {MAGENTA}{BOLD}║{RESET}")
-        print(f"  {MAGENTA}{BOLD}╟{'─' * 62}╢{RESET}")
+        print(f"\n  {MAGENTA}{BOLD}╔{'═' * 75}╗{RESET}")
+        print(f"  {MAGENTA}{BOLD}║{RESET}  {WHITE}{BOLD}Mystery Parcel #{i}{RESET}  {GRAY}(Test Sample #{s_idx}){RESET}{' ' * (75 - 35 - len(str(s_idx)))} {MAGENTA}{BOLD}║{RESET}")
+        print(f"  {MAGENTA}{BOLD}╠{'═' * 75}╣{RESET}")
+        print(f"  {MAGENTA}{BOLD}║{RESET}  {ARROW} Physical Clues Outside the Box:{' ' * 41}{MAGENTA}{BOLD}║{RESET}")
+        print(f"  {MAGENTA}{BOLD}║{RESET}      - Transfer Speed   : {WHITE}{fmt_bytes(speed_val):<20}{RESET}                         {MAGENTA}{BOLD}║{RESET}")
+        print(f"  {MAGENTA}{BOLD}║{RESET}      - Min Packet Gap   : {WHITE}{fmt_time(min_iat):<20}{RESET}                         {MAGENTA}{BOLD}║{RESET}")
+        print(f"  {MAGENTA}{BOLD}║{RESET}      - Flow Duration    : {WHITE}{fmt_time(duration):<20}{RESET}                         {MAGENTA}{BOLD}║{RESET}")
+        print(f"  {MAGENTA}{BOLD}║{RESET}      - Avg Incoming Gap : {WHITE}{fmt_time(avg_biat):<20}{RESET}                         {MAGENTA}{BOLD}║{RESET}")
+        print(f"  {MAGENTA}{BOLD}╚{'═' * 75}╝{RESET}")
 
-        # Confidence bar
-        bar_full = int(conf / 2)  # 50 chars = 100%
-        bar_char = f"{GREEN}{'█' * bar_full}{GRAY}{'░' * (50 - bar_full)}{RESET}"
-        print(f"  {MAGENTA}{BOLD}║{RESET}  Prediction   {WHITE}{BOLD}{pred_label:<20}{RESET} {bar_char} {MAGENTA}{BOLD}║{RESET}")
-        print(f"  {MAGENTA}{BOLD}║{RESET}  Confidence   {conf:>5.1f}%{' ' * 41}{MAGENTA}{BOLD}║{RESET}")
-        print(f"  {MAGENTA}{BOLD}║{RESET}  Truth        {WHITE}{BOLD}{true_label:<20}{RESET} {status_icon} {status_text}{' ' * (25 - len(true_label))}{MAGENTA}{BOLD}║{RESET}")
-        print(f"  {MAGENTA}{BOLD}╚{'═' * 62}╝{RESET}")
-        print()
+        # Render Obsidian Nodal Topology Graph
+        render_obsidian_nodal_graph(pred_label, conf_app, true_label, pred_vpn_flag, conf_vpn, true_vpn_flag, classes, probs=probs, vpn_probs=vpn_probs)
 
     # Accuracy summary
-    print(f"  {BOLD}Live Accuracy{RESET}  {correct}/3 parcels identified correctly")
+    print(f"\n  {BOLD}Dual-Head Live Performance:{RESET}")
+    print(f"  {DOT} Application Accuracy : {app_correct}/3 correct")
+    print(f"  {DOT} Transport Accuracy   : {vpn_correct}/3 correct")
+    print(f"  {DOT} Perfect Dual Match   : {both_correct}/3 parcels completely solved")
 
     # ═════════════════════════════════════════════════════════
     # Footer
