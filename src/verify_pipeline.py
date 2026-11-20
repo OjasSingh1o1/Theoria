@@ -36,7 +36,7 @@ def run_health_check():
         "scaler.pkl", "label_encoder.pkl", "dummy_classifier.pkl",
         "decision_tree.pkl", "k-nearest_neighbors.pkl",
         "random_forest.pkl", "gradient_boosting_(histgb).pkl",
-        "multi-layer_perceptron.pkl"
+        "multi-layer_perceptron.pkl", "vpn_classifier.pkl"
     ]
     print("\n[>] Checking Trained Models (models/):")
     for m in models_to_check:
@@ -50,6 +50,7 @@ def run_health_check():
         "model_comparison.json", "model_benchmark_comparison.png",
         "theoria_nodal_relationship_graph.png",
         "random_forest_confusion_matrix.png",
+        "vpn_confusion_matrix.png",
         "feature_importance_ranking.png", "shap_global_bar.png",
         "shap_voip_dot.png", "shap_values.npz"
     ]
@@ -59,22 +60,30 @@ def run_health_check():
         assert os.path.exists(p), f"Missing result artifact: {p}"
         print(f"    [✓] {pl:<35} ({os.path.getsize(p)/1024:.1f} KB)")
 
-    # 5. Live inference test
-    print("\n[>] Testing End-to-End Live Inference:")
+    # 5. Live inference test (Dual-Head: App + VPN)
+    print("\n[>] Testing End-to-End Dual-Head Live Inference:")
     rf = joblib.load("models/random_forest.pkl")
+    rf_vpn = joblib.load("models/vpn_classifier.pkl")
     le = joblib.load("models/label_encoder.pkl")
     sample_x = data['X_test'][0:1]
     sample_y = data['y_app_test'][0]
+    sample_vpn = int(data['y_vpn_test'][0])
     
     pred_idx = rf.predict(sample_x)[0]
     probs = rf.predict_proba(sample_x)[0]
     pred_label = le.inverse_transform([pred_idx])[0]
     true_label = le.inverse_transform([sample_y])[0]
+
+    pred_vpn = rf_vpn.predict(sample_x)[0]
+    vpn_probs = rf_vpn.predict_proba(sample_x)[0]
+    pred_vpn_str = "VPN TUNNEL" if pred_vpn == 1 else "DIRECT INTERNET"
+    true_vpn_str = "VPN TUNNEL" if sample_vpn == 1 else "DIRECT INTERNET"
     
-    print(f"    - Ground Truth:  {true_label}")
-    print(f"    - Prediction:    {pred_label} (Confidence: {probs[pred_idx]*100:.1f}%)")
-    assert pred_label == true_label, "Inference verification mismatch"
-    print("    [✓] Live inference verified successfully!")
+    print(f"    - Head 1 (App):  Truth = {true_label:<12} | Pred = {pred_label:<12} (Conf: {probs[pred_idx]*100:.1f}%)")
+    print(f"    - Head 2 (VPN):  Truth = {true_vpn_str:<12} | Pred = {pred_vpn_str:<12} (Conf: {vpn_probs[pred_vpn]*100:.1f}%)")
+    assert pred_label == true_label, "App inference verification mismatch"
+    assert pred_vpn == sample_vpn, "VPN inference verification mismatch"
+    print("    [✓] Dual-head live inference verified successfully!")
 
     print("=" * 60)
     print("ALL CHECKS PASSED: Theoria is 100% operational!")

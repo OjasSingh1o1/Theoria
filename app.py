@@ -49,14 +49,15 @@ st.markdown('<div class="sub-title"><b>Encrypted Network Traffic Classification<
 @st.cache_resource
 def load_assets():
     rf = joblib.load("models/random_forest.pkl")
+    rf_vpn = joblib.load("models/vpn_classifier.pkl")
     le = joblib.load("models/label_encoder.pkl")
     scaler = joblib.load("models/scaler.pkl")
     data = np.load("data/prepared_data.npz", allow_pickle=True)
     with open("results/model_comparison.json") as f:
         metrics = json.load(f)
-    return rf, le, scaler, data, metrics
+    return rf, rf_vpn, le, scaler, data, metrics
 
-rf, le, scaler, data, metrics = load_assets()
+rf, rf_vpn, le, scaler, data, metrics = load_assets()
 classes = list(data['classes'])
 features = list(data['feature_names'])
 
@@ -114,13 +115,33 @@ with tab1:
         pred_label = le.inverse_transform([pred_idx])[0]
         confidence = probs[pred_idx] * 100
 
+        # Head 2: VPN Encapsulation
+        vpn_probs = rf_vpn.predict_proba(x_scaled)[0]
+        pred_vpn_flag = np.argmax(vpn_probs)
+        conf_vpn = vpn_probs[pred_vpn_flag] * 100
+        true_vpn_flag = int(data['y_vpn_test'][sample_idx])
+        pred_vpn_str = "SECURE VPN TUNNEL" if pred_vpn_flag == 1 else "DIRECT INTERNET"
+        true_vpn_str = "SECURE VPN TUNNEL" if true_vpn_flag == 1 else "DIRECT INTERNET"
+
         with col_result:
-            if pred_label == true_label:
-                st.success(f"### 🎉 Guess: **{pred_label}** ({confidence:.1f}% confidence)")
-                st.write(f"✅ **Ground Truth:** **{true_label}** (The model correctly identified the sealed parcel!)")
+            app_match = (pred_label == true_label)
+            vpn_match = (pred_vpn_flag == true_vpn_flag)
+
+            st.markdown(f"### 🔮 Dual-Head Prediction:")
+            r1, r2 = st.columns(2)
+            with r1:
+                st.metric("Application Guess", f"{pred_label}", f"{confidence:.1f}% confidence")
+                st.caption(f"Truth: **{true_label}** {'✅' if app_match else '❌'}")
+            with r2:
+                st.metric("Transport Channel", f"{pred_vpn_str}", f"{conf_vpn:.1f}% confidence")
+                st.caption(f"Truth: **{true_vpn_str}** {'✅' if vpn_match else '❌'}")
+
+            if app_match and vpn_match:
+                st.success("🎉 **Perfect Dual Match:** Both the application and the VPN tunnel encapsulation were correctly identified from side-channel metadata!")
+            elif app_match:
+                st.info(f"✅ Correct application (**{pred_label}**), but transport was misclassified.")
             else:
-                st.warning(f"### ⚠️ Guess: **{pred_label}** ({confidence:.1f}% confidence)")
-                st.write(f"Ground Truth was: **{true_label}**")
+                st.warning(f"⚠️ Application was **{true_label}** (predicted {pred_label}).")
 
         st.write("#### 📊 Confidence Meter Across All 7 Applications:")
         prob_df = pd.DataFrame({
