@@ -95,10 +95,9 @@ flowchart TD
     subgraph Stage_4["Stage 4: Explainability & Deployment"]
         Explain["Signal Discovery\nGini Importance & Tree SHAP"]
         CLI["theoria.py\nFlagship Terminal Engine"]
-        Web["app.py\nStreamlit Dashboard"]
 
         RF --> Explain
-        RF --> CLI & Web
+        RF --> CLI
     end
 ```
 
@@ -287,15 +286,27 @@ flowchart TD
         Raw_Flow --> Scaler_Transform --> Scaled_Vector
     end
 
-    subgraph Model_Inference["Ensemble Consensus"]
-        Scaled_Vector --> Forest["Random Forest Ensemble\n(100 Independent Decision Trees)"]
-        Forest --> Votes["Tabulate Class Probability Distribution\n[P_Browsing, P_VoIP, P_Streaming, ...]"]
+    subgraph Dual_Head_Inference["Dual-Head Ensemble Inference"]
+        direction TB
+        subgraph Head_1["Head 1: Application Classifier"]
+            Forest_App["Random Forest (100 Trees)\n7 Target Classes"]
+            Votes_App["Application Probability Distribution\n[P_Browsing, P_VoIP, P_Streaming, ...]"]
+            Forest_App --> Votes_App
+        end
+
+        subgraph Head_2["Head 2: VPN Encapsulation Classifier"]
+            Forest_VPN["Random Forest (100 Trees)\nBinary Tunnel Detection"]
+            Votes_VPN["Encapsulation Probability Distribution\n[P_Direct, P_VPN]"]
+            Forest_VPN --> Votes_VPN
+        end
+
+        Scaled_Vector --> Forest_App
+        Scaled_Vector --> Forest_VPN
     end
 
-    subgraph Decision_Output["Output Generation"]
-        Votes --> ArgMax["Select ArgMax Application"]
-        ArgMax --> Confidence["Compute Confidence Percentage"]
-        Confidence --> Display["Format Industry-Grade Terminal Inspection Box\n(Smart Unit Conversion: KB/s, ms, s)"]
+    subgraph Topology_Output["Dynamic Constellation Generation"]
+        Votes_App & Votes_VPN --> Topology["Dynamic Obsidian Topology Constellation\nCarrier Resonance Ray + Contender Filament"]
+        Topology --> Display["Industry-Grade Terminal Display\n(Live Mystery Parcel + Key Findings Summary)"]
     end
 ```
 
@@ -335,7 +346,16 @@ pip install -r requirements.txt
 Run the primary terminal demonstration with system telemetry, benchmark tables, signal rankings, and live mystery parcel testing:
 
 ```bash
+# Standard comprehensive analysis
 ./venv/bin/python theoria.py
+
+# CLI inspection flags
+./venv/bin/python theoria.py --samples 5         # Inspect 5 random parcels
+./venv/bin/python theoria.py --sample-id 1042    # Inspect specific test sample flow
+./venv/bin/python theoria.py --compact           # Run with compact decision cards
+./venv/bin/python theoria.py --predict-only      # Jump straight to live inference
+./venv/bin/python theoria.py --no-banner         # Quiet mode: suppress ASCII art header
+./venv/bin/python theoria.py --no-color          # Pipe-safe plain text (strips ANSI codes)
 ```
 
 ### 3. Pipeline Health & Verification
@@ -343,13 +363,6 @@ Verify artifact integrity, model serialization, and live prediction sanity:
 
 ```bash
 ./venv/bin/python src/verify_pipeline.py
-```
-
-### 4. Interactive Web Dashboard
-Launch the interactive Streamlit user interface:
-
-```bash
-./venv/bin/python -m streamlit run app.py
 ```
 
 ---
@@ -360,7 +373,6 @@ Launch the interactive Streamlit user interface:
 Theoria/
 ├── README.md                       # Comprehensive system architecture & documentation
 ├── theoria.py                      # Flagship terminal engine and live inspector
-├── app.py                          # Streamlit web visualization dashboard
 ├── requirements.txt                # Pinned production dependencies
 ├── consolidated_traffic_data.csv   # Unzipped raw dataset (59,706 rows x 24 columns)
 ├── data/
@@ -373,10 +385,12 @@ Theoria/
 │   ├── k-nearest_neighbors.pkl     # Paper baseline 2 (Gate check)
 │   ├── random_forest.pkl           # Ensemble champion (92.61%)
 │   ├── gradient_boosting_(histgb).pkl # Boosted decision trees
-│   └── multi-layer_perceptron.pkl  # Neural network baseline
+│   ├── multi-layer_perceptron.pkl  # Neural network baseline
+│   └── vpn_classifier.pkl          # Binary VPN encapsulation detector (93.79%)
 ├── results/                        # Confusion matrices and SHAP explainability plots
 │   ├── model_comparison.json       # Benchmark metrics across all models
 │   ├── random_forest_confusion_matrix.png
+│   ├── vpn_confusion_matrix.png
 │   ├── feature_importance_ranking.png
 │   ├── shap_global_bar.png
 │   ├── shap_voip_dot.png
@@ -386,7 +400,8 @@ Theoria/
 └── src/
     ├── preprocessing.py            # Data hygiene & stratified splitting
     ├── train.py                    # Multi-model benchmarking pipeline
-    ├── explainability.py          # Gini importance and SHAP computation
+    ├── train_vpn.py                # Binary VPN encapsulation classifier training
+    ├── explainability.py           # Gini importance and SHAP computation
     └── verify_pipeline.py          # End-to-end system verification suite
 ```
 

@@ -87,11 +87,12 @@
 
 * **Theoria CLI (`theoria.py`):**
   * Built with senior developer terminal aesthetics: ANSI truecolor palettes, Unicode box tables, and dynamic unit formatting.
-  * Live mystery parcel inspector: picks 3 random, unseen test flows on every run to demonstrate real-time inference without pre-seeded bias.
-* **Streamlit Web Dashboard (`app.py`):**
-  * Full interactive parcel inspector with real-time probability distribution gauges and confusion matrix viewers.
+  * **Dual-Head Live Inference:** Simultaneously classifies application type (7 classes) and transport encapsulation (VPN vs. Direct).
+  * **Dynamic Obsidian Constellation Topology:** Real-time force-directed topology rendering based on probability distributions, projecting carrier resonance rays and contender filaments.
+  * **Engineering Key Findings:** Real-time synthesis of payload invariance, tunnel leakage, dominant signal, and line-rate execution duration.
+  * **Production CLI Flags:** `--compact`, `--predict-only`, `--samples N`, `--sample-id ID`, `--no-banner`, and `--no-color`.
 * **Speaker Notes:**
-  > "We built two delivery interfaces: a Streamlit web app, and our flagship terminal engine, theoria.py. The terminal engine displays real-time telemetry, benchmark tables, and randomly selects three mystery parcels from unseen test traffic to demonstrate live, zero-payload classification."
+  > "We built a flagship terminal engine, theoria.py. It simultaneously executes dual-head inference—predicting both the application and whether it is wrapped in a VPN tunnel—and visualizes the confidence landscape through a dynamic Obsidian-style constellation topology map. A dynamic Key Findings section summarizes engineering takeaways, and comprehensive CLI flags support scripting and CI environments."
 
 ---
 

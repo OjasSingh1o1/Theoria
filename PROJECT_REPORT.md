@@ -97,6 +97,9 @@ The research paper established Decision Tree and k-NN baselines. By achieving **
 ### 4.2 Why Random Forest Succeeded
 Tabular network telemetry is dominated by orthogonal, axis-aligned decision boundaries (e.g., `flowBytesPerSecond > 50000` AND `min_flowiat < 0.02`). The Random Forest ensemble of 100 decorrelated trees naturally partitions these boundaries without suffering from the gradient vanishing issues that degraded the Multi-Layer Perceptron (71.40%).
 
+### 4.3 Dual-Head Architecture: VPN Encapsulation Detection
+In addition to multiclass application identification, we deployed a dedicated Random Forest classifier on the binary `is_vpn` target (`y_vpn_train` / `y_vpn_test`). The model achieved **93.79% accuracy** and **0.9400 F1-score** across 11,942 test flows. This demonstrates that while VPN tunneling alters packet encapsulation and encrypts headers, it introduces characteristic overhead and interval perturbations that remain detectable through physical side-channel observation alone.
+
 ---
 
 ## 5. Signal Discovery & Explainability
@@ -120,9 +123,9 @@ To answer *which physical properties carry the signal*, we analyzed Gini Feature
 
 ## 6. System Deployment & Deliverables
 
-1. **Flagship Terminal CLI (`theoria.py`):** Standalone terminal command featuring ANSI truecolor tables, dynamic unit conversions (B/s $\rightarrow$ MB/s, µs $\rightarrow$ hours), and live mystery parcel inspection.
-2. **Interactive Web Dashboard (`app.py`):** 4-tab Streamlit dashboard providing interactive parcel inspection, model arena comparisons, confusion matrices, and explainability visuals.
-3. **Automated Verification Suite (`src/verify_pipeline.py`):** Self-testing health suite verifying model serialization, data partition dimensions, and inference integrity.
+1. **Flagship Terminal CLI (`theoria.py`):** Standalone terminal engine featuring ANSI truecolor tables, dynamic unit conversions (B/s $\rightarrow$ MB/s, µs $\rightarrow$ hours), dual-head live mystery parcel inspection (Application + VPN encapsulation), dynamic Obsidian constellation topology mapping, and an executive Key Findings summary. Supports developer CLI flags (`--samples`, `--sample-id`, `--compact`, `--predict-only`, `--no-banner`, `--no-color`).
+2. **Automated Verification Suite (`src/verify_pipeline.py`):** Self-testing health suite verifying model serialization, data partition dimensions, and dual-head inference integrity.
+3. **Reproducible Modeling Pipelines (`src/`):** Clean modular scripts for data preprocessing (`preprocessing.py`), multi-model benchmarking (`train.py`), VPN encapsulation classification (`train_vpn.py`), and SHAP explainability analysis (`explainability.py`).
 
 ---
 

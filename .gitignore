@@ -47,7 +47,10 @@ Thumbs.db
 *.pcapng
 consolidated_traffic_data.csv
 
-# Project log & personal study notes (as requested to exclude before pushing to GitHub)
+# Project log & personal study notes (local only)
 PROJECT_LOG.md
 PERSONAL_NOTES.md
 .agent_profile.md
+
+# Optional Streamlit dashboard (secondary artifact, not core CLI deliverable)
+app.py

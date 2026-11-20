@@ -19,8 +19,7 @@ def train_vpn_model(data_path="data/prepared_data.npz", output_dir="models", res
     print("[+] Loading prepared dataset partitions for VPN classification...")
     data = np.load(data_path, allow_pickle=True)
     X_train, y_train = data['X_train'], data['y_vpn_train']
-    X_test, y_test = data['y_vpn_test'], data['y_vpn_test'] # Note: test data
-    X_test = data['X_test']
+    X_test, y_test = data['X_test'], data['y_vpn_test']
 
     print(f"[+] Loaded: Train = {len(X_train):,}, Test = {len(X_test):,}")
     print(f"    - Train class balance: Direct={np.sum(y_train==0):,} ({(y_train==0).mean()*100:.1f}%), VPN={np.sum(y_train==1):,} ({(y_train==1).mean()*100:.1f}%)")
